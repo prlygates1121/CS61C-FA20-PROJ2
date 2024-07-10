@@ -322,6 +322,13 @@ class TestMatmul(TestCase):
             [40, 14, 14, 14, 38]
         )
 
+    def test_non_square_3(self):
+        self.do_matmul(
+            [1, 2, 3, 4, 5, 6, 7, 8, 9], 3, 3,
+            [1, 2, 3, 4, 5, 6, 7, 8, 9, 1, 2, 3], 3, 4,
+            [38, 17, 23, 29, 83, 44, 59, 74, 128, 71, 95, 119]
+        )
+
 
     @classmethod
     def tearDownClass(cls):
@@ -330,30 +337,46 @@ class TestMatmul(TestCase):
 
 class TestReadMatrix(TestCase):
 
-    def do_read_matrix(self, fail='', code=0):
+    def do_read_matrix(self, fileName, NRows, NCols, result, fail='', code=0):
         t = AssemblyTest(self, "read_matrix.s")
         # load address to the name of the input file into register a0
-        t.input_read_filename("a0", "inputs/test_read_matrix/test_input.bin")
+        t.input_read_filename("a0", "inputs/test_read_matrix/" + fileName)
 
         # allocate space to hold the rows and cols output parameters
         rows = t.array([-1])
         cols = t.array([-1])
 
         # load the addresses to the output parameters into the argument registers
-        raise NotImplementedError("TODO")
-        # TODO
+        t.input_array("a1", rows)
+        t.input_array("a2", cols)
 
         # call the read_matrix function
         t.call("read_matrix")
 
         # check the output from the function
-        # TODO
+        t.check_array(rows, NRows)
+        t.check_array(cols, NCols)
+        t.check_array_pointer("a0", result) # stored somewhere in the heap memory, accessible via pointers
 
         # generate assembly and run it through venus
         t.execute(fail=fail, code=code)
 
     def test_simple(self):
-        self.do_read_matrix()
+        self.do_read_matrix("test_input.bin", [3], [3], [1, 2, 3, 4, 5, 6, 7, 8, 9])
+
+    def test_simple_2(self):
+        self.do_read_matrix("test_input_2.bin", [2], [9], [1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 12, 13, 14, 15, 16, 17, 18, 19])
+
+    def test_fopen_90(self):
+        self.do_read_matrix("test_input.bin", [3], [3], [1, 2, 3, 4, 5, 6, 7, 8, 9], "fopen", 90)
+    def test_malloc_88(self):
+        self.do_read_matrix("test_input.bin", [3], [3], [1, 2, 3, 4, 5, 6, 7, 8, 9], "malloc", 88)
+
+    def test_fread_91(self):
+        self.do_read_matrix("test_input.bin", [3], [3], [1, 2, 3, 4, 5, 6, 7, 8, 9], "fread", 91)
+
+    def test_fclose_92(self):
+        self.do_read_matrix("test_input.bin", [3], [3], [1, 2, 3, 4, 5, 6, 7, 8, 9], "fclose", 92)
 
     @classmethod
     def tearDownClass(cls):

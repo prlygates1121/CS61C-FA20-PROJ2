@@ -57,8 +57,6 @@ matmul:
     addi s8, s6, 0                  # s8 is the start of the column vector
     slli s7, a2, 2                  # s7 is 4 * columns of m0
 
-
-
 outer_loop_start:
     beq s0, s4, outer_loop_end
     addi s3, x0, 0                  # s3 is set to zero
@@ -71,7 +69,6 @@ inner_loop_start:
     addi a1, s6, 0                  # pass in the column vector
     addi a3, x0, 1                  # pass in the stride of row vector
     addi a4, a5, 0                  # pass in the stride of column vector
-
 
     # Mini-prologue
     addi sp, sp, -8
@@ -88,7 +85,6 @@ inner_loop_start:
 
     # Store the item in d
     sw a0, 0(s1)
-
 
     # Move pointer s1 one item forward
     addi s1, s1, 4
