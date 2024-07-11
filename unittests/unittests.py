@@ -366,6 +366,9 @@ class TestReadMatrix(TestCase):
         self.do_read_matrix("test_input_2.bin", [2], [9],
                             [1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 12, 13, 14, 15, 16, 17, 18, 19])
 
+    def test_simple_3(self):
+        self.do_read_matrix("test_input_3.bin", [1], [1], [1])
+
     def test_fopen_90(self):
         self.do_read_matrix("test_input.bin", [3], [3], [1, 2, 3, 4, 5, 6, 7, 8, 9], "fopen", 90)
 
@@ -431,7 +434,7 @@ class TestWriteMatrix(TestCase):
 
 class TestClassify(TestCase):
 
-    def make_test(self):
+    def make_test(self, a2, out_file_name, ref_file_name, m0_path, m1_path, input_path, classification):
         t = AssemblyTest(self, "classify.s")
         t.include("argmax.s")
         t.include("dot.s")
@@ -439,23 +442,27 @@ class TestClassify(TestCase):
         t.include("read_matrix.s")
         t.include("relu.s")
         t.include("write_matrix.s")
-        return t
 
-    def test_simple0_input0(self):
-        t = self.make_test()
-        out_file = "outputs/test_basic_main/student0.bin"
-        ref_file = "outputs/test_basic_main/reference0.bin"
-        args = ["inputs/simple0/bin/m0.bin", "inputs/simple0/bin/m1.bin",
-                "inputs/simple0/bin/inputs/input0.bin", out_file]
+        out_file = "outputs/test_basic_main/" + out_file_name
+        ref_file = "outputs/test_basic_main/" + ref_file_name
+        args = [m0_path, m1_path, input_path, out_file]
+        # set a2
+        t.input_scalar("a2", a2)
+
         # call classify function
         t.call("classify")
         # generate assembly and pass program arguments directly to venus
         t.execute(args=args)
 
         # compare the output file and
-        raise NotImplementedError("TODO")
-        # TODO
+        t.check_file_output(out_file, ref_file)
         # compare the classification output with `check_stdout`
+        t.check_stdout(classification)
+
+    def test_simple0_input0(self):
+        self.make_test(0, "student0.bin", "reference0.bin",
+                       "inputs/simple0/bin/m0.bin", "inputs/simple0/bin/m1.bin",
+                       "inputs/simple0/bin/inputs/input0.bin", "2")
 
     @classmethod
     def tearDownClass(cls):

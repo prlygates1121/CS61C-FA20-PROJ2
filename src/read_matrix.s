@@ -1,5 +1,8 @@
 .globl read_matrix
 
+.data
+buffer: .space 8
+
 .text
 # ==============================================================================
 # FUNCTION: Allocates memory and reads in a binary file as a matrix of integers
@@ -48,14 +51,10 @@ read_matrix:
     beq a0, t0, exception90   # Check the return value
     addi s0, a0, 0            # s0 holds the file descriptor for later use
 
-    # Allocate memory for the first 2 ints
-    addi a0, x0, 8            # a0 is the # of bytes to allocate
-    jal malloc                # Call malloc (returns a pointer)
-    beq a0, x0, exception88   # Check the pointer
-
     # Read the first 2 ints
     addi a1, s0, 0            # a1 gets the file descriptor
-    addi a2, a0, 0            # a2 gets the pointer to the allocated heap memory
+    la t0, buffer
+    addi a2, t0, 0            # a2 gets the pointer to buffer
     addi a3, x0, 8            # a3 is the # of bytes to read from the file
     addi s1, a3, 0            # s1 holds a3 for future use
     addi s2, a2, 0            # s2 holds the memory address for future use
